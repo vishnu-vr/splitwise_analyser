@@ -188,6 +188,10 @@ class _ExpenseAppState extends State<ExpenseApp> {
     Map<String, double> monthlyTotals =
         _monthlyCategoryTotals[selectedMonth] ?? {};
 
+    // Calculate the overall monthly total
+    double overallMonthlyTotal =
+        monthlyTotals.values.fold(0.0, (sum, value) => sum + value);
+
     // Filter the data to get only the entries for the selected month
     List<List<dynamic>> selectedMonthData = _csvFile != null
         ? _csvFile!
@@ -237,6 +241,11 @@ class _ExpenseAppState extends State<ExpenseApp> {
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             for (var entry in sortedMonthlyTotals)
               Text('${entry.key}: ${entry.value.toStringAsFixed(2)}'),
+            const SizedBox(height: 10),
+            Text(
+                'Overall Monthly Total: ${overallMonthlyTotal.toStringAsFixed(2)}',
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
             Text('Name Totals for ${selectedMonth}:',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -250,6 +259,9 @@ class _ExpenseAppState extends State<ExpenseApp> {
                   initialDate: _selectedDate,
                   firstDate: DateTime(2000),
                   lastDate: DateTime(2101),
+                  selectableDayPredicate: (DateTime val) {
+                    return val.day == 1;
+                  },
                   initialDatePickerMode: DatePickerMode.year,
                 );
                 if (pickedDate != null && pickedDate != _selectedDate) {
