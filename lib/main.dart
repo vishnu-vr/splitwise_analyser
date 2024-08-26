@@ -278,25 +278,61 @@ class _ExpenseAppState extends State<ExpenseApp> {
     );
   }
 
+  Widget _buildLineChart() {
+    // Prepare data for the line chart by calculating total expenses for each month
+    List<ChartData> monthlyExpenseData =
+        _monthlyCategoryTotals.entries.map((entry) {
+      String month = entry.key;
+      double totalExpense =
+          entry.value.values.fold(0.0, (sum, value) => sum + value);
+      return ChartData(month, totalExpense);
+    }).toList();
+
+    // Sort the data by month (optional, but ensures proper time order)
+    monthlyExpenseData.sort((a, b) => a.category.compareTo(b.category));
+
+    return SfCartesianChart(
+      title: ChartTitle(text: 'Monthly Expense Trend (Line Chart)'),
+      primaryXAxis: CategoryAxis(),
+      primaryYAxis: NumericAxis(
+        title: AxisTitle(text: 'Total Expenses'),
+      ),
+      series: <ChartSeries>[
+        LineSeries<ChartData, String>(
+          dataSource: monthlyExpenseData,
+          xValueMapper: (ChartData data, _) => data.category,
+          yValueMapper: (ChartData data, _) => data.amount,
+          dataLabelSettings: const DataLabelSettings(isVisible: true),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChartsTab() {
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildPieChart(),
+          const SizedBox(height: 20),
+          _buildBarChart(),
+          const SizedBox(height: 20),
+          _buildLineChart(), // Added the line chart here
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: _resetAndPickAnotherFile,
+            child: const Text('Pick Another CSV File'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> _widgetOptions = <Widget>[
       _dataLoaded
-          ? SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildPieChart(),
-                  const SizedBox(height: 20),
-                  _buildBarChart(),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _resetAndPickAnotherFile,
-                    child: const Text('Pick Another CSV File'),
-                  ),
-                ],
-              ),
-            )
+          ? _buildChartsTab() // Use the updated charts tab here
           : ElevatedButton(
               onPressed: _pickCsvFile,
               child: const Text('Pick CSV File'),
