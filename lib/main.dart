@@ -135,6 +135,38 @@ class _ExpenseAppState extends State<ExpenseApp> {
     _pickCsvFile();
   }
 
+  Widget _buildDonutChart() {
+    // Sort the categories by amount and take the top 4
+    List<ChartData> topCategories = _chartData
+      ..sort((a, b) => b.amount.compareTo(a.amount));
+    topCategories = topCategories.take(4).toList();
+
+    return SfCircularChart(
+      title: ChartTitle(text: 'Top Expense Categories (Donut Chart)'),
+      legend: Legend(isVisible: true),
+      series: <CircularSeries>[
+        DoughnutSeries<ChartData, String>(
+          dataSource: topCategories,
+          xValueMapper: (ChartData data, _) => data.category,
+          yValueMapper: (ChartData data, _) => data.amount,
+          dataLabelMapper: (ChartData data, _) {
+            if (_totalExpense == 0) {
+              return '0%';
+            }
+            return '${((data.amount / _totalExpense) * 100).toStringAsFixed(1)}%';
+          },
+          dataLabelSettings: DataLabelSettings(
+            isVisible: true,
+            showZeroValue: false,
+            labelPosition: ChartDataLabelPosition.outside,
+            textStyle: TextStyle(fontSize: 12),
+          ),
+          innerRadius: '60%', // This creates the donut effect
+        ),
+      ],
+    );
+  }
+
   Widget _buildPieChart() {
     return SfCircularChart(
       title: ChartTitle(text: 'Category-wise Expense Breakdown (Pie Chart)'),
@@ -322,11 +354,11 @@ class _ExpenseAppState extends State<ExpenseApp> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildPieChart(),
+          _buildDonutChart(), // Replaced the pie chart with the new donut chart
           const SizedBox(height: 20),
           _buildBarChart(),
           const SizedBox(height: 20),
-          _buildLineChart(), // Added the line chart here
+          _buildLineChart(),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: _resetAndPickAnotherFile,
