@@ -83,6 +83,9 @@ class _ExpenseAppState extends State<ExpenseApp> {
       for (var i = 1; i < fields.length; i++) {
         // Start from 1 to skip the header row
         var row = fields[i];
+        if (row.length == 1) {
+          continue;
+        }
         String category =
             row[2]?.toString() ?? 'Uncategorized'; // Category is the 3rd column
         double cost = double.tryParse(row[3]?.toString() ?? '0.0') ??
@@ -240,6 +243,7 @@ class _ExpenseAppState extends State<ExpenseApp> {
             .split('\n')
             .skip(1)
             .map((line) => line.split(','))
+            .where((row) => row.length > 1)
             .where((row) {
             DateTime date = DateTime.parse(row[0]);
             return DateFormat('yyyy-MM').format(date) == selectedMonth;
