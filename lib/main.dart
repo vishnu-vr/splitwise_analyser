@@ -165,21 +165,30 @@ class _ExpenseAppState extends State<ExpenseApp> {
     // Sort the chart data by amount in descending order
     _chartData.sort((a, b) => b.amount.compareTo(a.amount));
 
-    return SfCartesianChart(
-      title: ChartTitle(text: 'Category-wise Expense Breakdown (Bar Chart)'),
-      legend: const Legend(isVisible: false),
-      primaryXAxis: CategoryAxis(),
-      primaryYAxis: NumericAxis(
-        title: AxisTitle(text: 'Amount'),
-      ),
-      series: <ChartSeries>[
-        BarSeries<ChartData, String>(
-          dataSource: _chartData,
-          xValueMapper: (ChartData data, _) => data.category,
-          yValueMapper: (ChartData data, _) => data.amount,
-          dataLabelSettings: const DataLabelSettings(isVisible: true),
+    return Container(
+      height:
+          600, // Increase height of the chart to accommodate more categories
+      child: SfCartesianChart(
+        title: ChartTitle(text: 'Category-wise Expense Breakdown (Bar Chart)'),
+        primaryXAxis: CategoryAxis(
+          // Adjusting the axis properties for better spacing
+          labelStyle: TextStyle(fontSize: 10), // Adjust label font size
+          labelRotation: 0, // Keep label rotation horizontal
+          maximumLabels: _chartData.length, // Ensure all labels are shown
         ),
-      ],
+        primaryYAxis: NumericAxis(
+          title: AxisTitle(text: 'Amount'),
+        ),
+        series: <ChartSeries>[
+          BarSeries<ChartData, String>(
+            dataSource: _chartData,
+            xValueMapper: (ChartData data, _) => data.category,
+            yValueMapper: (ChartData data, _) => data.amount,
+            dataLabelSettings: const DataLabelSettings(isVisible: true),
+            spacing: 0.2, // Adjust spacing between bars if needed
+          ),
+        ],
+      ),
     );
   }
 
