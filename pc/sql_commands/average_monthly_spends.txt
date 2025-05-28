@@ -1,0 +1,80 @@
+USE [excel_imports]
+GO
+
+-- Common Table Expression (CTE) to calculate monthly totals for all available data
+WITH MonthlyExpenses AS (
+    SELECT
+        YEAR([Date]) AS ExpenseYear,
+        MONTH([Date]) AS ExpenseMonthNumber,
+        SUM([Your Expense]) AS MonthlyTotalExpense
+    FROM
+        [dbo].[All_My_Expenses_Combined] -- Or [dbo].[All_My_Expenses_Combined_New]
+    WHERE
+        [Date] IS NOT NULL
+        AND [Your Expense] IS NOT NULL
+    GROUP BY
+        YEAR([Date]),
+        MONTH([Date])
+)
+-- Average monthly spend for the LAST 3 MONTHS
+SELECT
+    'Last 3 Months' AS Period,
+    AVG(MonthlyTotalExpense) AS AverageMonthlySpend
+FROM
+    MonthlyExpenses
+WHERE
+    -- Filter for months within the last 3 months from today's date
+    -- DATEDIFF(month, DATEFROMPARTS(ExpenseYear, ExpenseMonthNumber, 1), GETDATE()) <= 3
+    -- A more robust way to get the last N months, ensuring full months are counted:
+    DATEFROMPARTS(ExpenseYear, ExpenseMonthNumber, 1) >= DATEADD(month, -3, DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0));
+GO
+
+-- Average monthly spend for the LAST 6 MONTHS
+WITH MonthlyExpenses AS (
+    SELECT
+        YEAR([Date]) AS ExpenseYear,
+        MONTH([Date]) AS ExpenseMonthNumber,
+        SUM([Your Expense]) AS MonthlyTotalExpense
+    FROM
+        [dbo].[All_My_Expenses_Combined] -- Or [dbo].[All_My_Expenses_Combined_New]
+    WHERE
+        [Date] IS NOT NULL
+        AND [Your Expense] IS NOT NULL
+    GROUP BY
+        YEAR([Date]),
+        MONTH([Date])
+)
+SELECT
+    'Last 6 Months' AS Period,
+    AVG(MonthlyTotalExpense) AS AverageMonthlySpend
+FROM
+    MonthlyExpenses
+WHERE
+    -- Filter for months within the last 6 months from today's date
+    DATEFROMPARTS(ExpenseYear, ExpenseMonthNumber, 1) >= DATEADD(month, -6, DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0));
+GO
+
+-- Average monthly spend for the LAST 12 MONTHS (Last Year)
+WITH MonthlyExpenses AS (
+    SELECT
+        YEAR([Date]) AS ExpenseYear,
+        MONTH([Date]) AS ExpenseMonthNumber,
+        SUM([Your Expense]) AS MonthlyTotalExpense
+    FROM
+        [dbo].[All_My_Expenses_Combined] -- Or [dbo].[All_My_Expenses_Combined_New]
+    WHERE
+        [Date] IS NOT NULL
+        AND [Your Expense] IS NOT NULL
+    GROUP BY
+        YEAR([Date]),
+        MONTH([Date])
+)
+SELECT
+    'Last 12 Months (Last Year)' AS Period,
+    AVG(MonthlyTotalExpense) AS AverageMonthlySpend
+FROM
+    MonthlyExpenses
+WHERE
+    -- Filter for months within the last 12 months from today's date
+    DATEFROMPARTS(ExpenseYear, ExpenseMonthNumber, 1) >= DATEADD(year, -1, DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0));
+GO
