@@ -1,0 +1,42 @@
+USE [excel_imports]
+GO
+
+-- 1. Create the new table with the desired schema
+-- We'll name it All_My_Expenses_Combined_New to avoid conflict with the existing table
+CREATE TABLE [dbo].[All_My_Expenses_Combined_New](
+    [Date] [date] NULL,
+    [Description] [nvarchar](max) NULL,
+    [Category] [nvarchar](max) NULL,
+    [Your Expense] [decimal](18, 2) NULL,
+    [Source App] [nvarchar](max) NULL,
+    [Source File] [nvarchar](max) NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+-- 2. Insert data from the old table into the new table
+-- We'll use CONVERT to safely change the data types during insertion.
+-- This assumes your 'Date' column contains values that can be converted to a DATE type
+-- and 'Your Expense' contains values that can be converted to a DECIMAL type.
+INSERT INTO [dbo].[All_My_Expenses_Combined_New] (
+    [Date],
+    [Description],
+    [Category],
+    [Your Expense],
+    [Source App],
+    [Source File]
+)
+SELECT
+    -- Convert the 'Date' column from nvarchar to date
+    TRY_CONVERT(DATE, [Date]),
+    [Description],
+    [Category],
+    -- Convert the 'Your Expense' column from nvarchar to decimal
+    TRY_CONVERT(DECIMAL(18, 2), [Your Expense]),
+    [Source App],
+    [Source File]
+FROM
+    [dbo].[All_My_Expenses_Combined];
+GO
+
+-- Optional: Verify the data in the new table
+-- SELECT * FROM [dbo].[All_My_Expenses_Combined_New];

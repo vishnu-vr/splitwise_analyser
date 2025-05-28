@@ -1,0 +1,16 @@
+USE [excel_imports]
+GO
+
+SELECT
+    [Category],
+    SUM([Your Expense]) AS TotalExpense
+FROM
+    [dbo].[All_My_Expenses_Combined] -- Or [dbo].[All_My_Expenses_Combined_New] if you haven't renamed it yet
+WHERE
+    [Date] IS NOT NULL -- Ensure date is not null
+    AND [Your Expense] IS NOT NULL -- Ensure expense is not null
+GROUP BY
+    [Category]
+ORDER BY
+    TotalExpense DESC; -- Order by highest spending category first
+GO

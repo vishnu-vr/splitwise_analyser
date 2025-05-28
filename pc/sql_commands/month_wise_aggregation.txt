@@ -1,0 +1,26 @@
+USE [excel_imports]
+GO
+
+SELECT
+    -- Extract the year from the Date column
+    YEAR([Date]) AS ExpenseYear,
+    -- Extract the month number from the Date column
+    MONTH([Date]) AS ExpenseMonthNumber,
+    -- Get the full month name (e.g., 'January', 'February')
+    DATENAME(month, [Date]) AS ExpenseMonthName,
+    -- Calculate the sum of 'Your Expense' for each month
+    SUM([Your Expense]) AS MonthlyTotalExpense
+FROM
+    [dbo].[All_My_Expenses_Combined] -- Or [dbo].[All_My_Expenses_Combined_New] if you haven't renamed it yet
+WHERE
+    [Date] IS NOT NULL -- Exclude rows where the date conversion might have resulted in NULL
+    AND [Your Expense] IS NOT NULL -- Exclude rows where the expense conversion might have resulted in NULL
+
+GROUP BY
+    YEAR([Date]),
+    MONTH([Date]),
+    DATENAME(month, [Date])
+ORDER BY
+    ExpenseYear ASC,
+    ExpenseMonthNumber ASC;
+GO
