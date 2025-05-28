@@ -7,6 +7,7 @@ WITH MonthlyDescriptionSpending AS (
         MONTH([Date]) AS ExpenseMonthNumber,
         DATENAME(month, [Date]) AS ExpenseMonthName,
         [Description],
+        [Category], -- Added Category
         SUM([Your Expense]) AS MonthlyDescriptionTotal
     FROM
         [dbo].[All_My_Expenses_Combined] -- Or [dbo].[All_My_Expenses_Combined_New] if you haven't renamed it yet
@@ -19,7 +20,8 @@ WITH MonthlyDescriptionSpending AS (
         YEAR([Date]),
         MONTH([Date]),
         DATENAME(month, [Date]),
-        [Description]
+        [Description],
+        [Category] -- Added Category to GROUP BY
 ),
 RankedSpending AS (
     SELECT
@@ -27,6 +29,7 @@ RankedSpending AS (
         ExpenseMonthNumber,
         ExpenseMonthName,
         [Description],
+        [Category], -- Added Category
         MonthlyDescriptionTotal,
         ROW_NUMBER() OVER (PARTITION BY ExpenseYear, ExpenseMonthNumber ORDER BY MonthlyDescriptionTotal DESC) AS RowRank
     FROM
@@ -36,6 +39,7 @@ SELECT
     ExpenseYear,
     ExpenseMonthName,
     [Description],
+    [Category], -- Added Category
     MonthlyDescriptionTotal
 FROM
     RankedSpending
