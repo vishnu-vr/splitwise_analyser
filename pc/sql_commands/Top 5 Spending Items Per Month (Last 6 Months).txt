@@ -1,14 +1,19 @@
 USE [excel_imports]
 GO
 
-WITH MonthlyDescriptionSpending AS (
+WITH RankedIndividualExpenses AS (
     SELECT
+        [Date],
         YEAR([Date]) AS ExpenseYear,
         MONTH([Date]) AS ExpenseMonthNumber,
         DATENAME(month, [Date]) AS ExpenseMonthName,
         [Description],
-        [Category], -- Added Category
-        SUM([Your Expense]) AS MonthlyDescriptionTotal
+        [Category],
+        [Your Expense],
+        ROW_NUMBER() OVER (
+            PARTITION BY YEAR([Date]), MONTH([Date])
+            ORDER BY [Your Expense] DESC
+        ) AS RowRank
     FROM
         [dbo].[All_My_Expenses_Combined] -- Or [dbo].[All_My_Expenses_Combined_New] if you haven't renamed it yet
     WHERE
@@ -16,37 +21,20 @@ WITH MonthlyDescriptionSpending AS (
         AND [Your Expense] IS NOT NULL
         -- Filter for data within the last 6 months from today's date
         AND [Date] >= DATEADD(month, -6, GETDATE())
-    GROUP BY
-        YEAR([Date]),
-        MONTH([Date]),
-        DATENAME(month, [Date]),
-        [Description],
-        [Category] -- Added Category to GROUP BY
-),
-RankedSpending AS (
-    SELECT
-        ExpenseYear,
-        ExpenseMonthNumber,
-        ExpenseMonthName,
-        [Description],
-        [Category], -- Added Category
-        MonthlyDescriptionTotal,
-        ROW_NUMBER() OVER (PARTITION BY ExpenseYear, ExpenseMonthNumber ORDER BY MonthlyDescriptionTotal DESC) AS RowRank
-    FROM
-        MonthlyDescriptionSpending
 )
 SELECT
     ExpenseYear,
     ExpenseMonthName,
+    [Date],
     [Description],
-    [Category], -- Added Category
-    MonthlyDescriptionTotal
+    [Category],
+    [Your Expense]
 FROM
-    RankedSpending
+    RankedIndividualExpenses
 WHERE
     RowRank <= 5
 ORDER BY
     ExpenseYear DESC,
     ExpenseMonthNumber DESC,
-    MonthlyDescriptionTotal DESC;
+    [Your Expense] DESC;
 GO
